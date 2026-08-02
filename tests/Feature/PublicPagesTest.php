@@ -73,6 +73,21 @@ test('experience page receives resume data', function () {
         );
 });
 
+test('schooling page receives education data', function () {
+    $this->get(route('schooling'))
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page) => $page
+            ->component('Schooling')
+            ->has('education', 2)
+            ->has('education.0.institution')
+            ->has('education.0.location')
+            ->has('education.0.program')
+            ->has('education.0.period')
+            // Pins most-recent-first ordering, which the timeline relies on.
+            ->where('education.0.period', '2021 – 2023')
+        );
+});
+
 test('experience page lists every role for a multi-role position', function () {
     $this->get(route('experience'))
         ->assertInertia(fn (AssertableInertia $page) => $page

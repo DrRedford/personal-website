@@ -14,3 +14,10 @@ export type Position = {
     roles: Role[];
     highlights: string[];
 };
+
+export type Education = {
+    institution: string;
+    location: string;
+    program: string;
+    period: string;
+};
