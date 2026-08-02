@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\Schema;
 use Inertia\Testing\AssertableInertia;
 
 test('renders successfully', function (string $routeName) {
@@ -12,6 +13,32 @@ test('renders successfully', function (string $routeName) {
     'schooling',
     'projects',
 ]);
+
+/*
+ * The test suite runs with SESSION_DRIVER=array, so it would not otherwise
+ * exercise the database session handler that production actually uses.
+ */
+test('renders successfully using the database session driver', function (string $routeName) {
+    config()->set('session.driver', 'database');
+
+    $this->get(route($routeName))->assertOk();
+})->with([
+    'home',
+    'experience',
+    'schooling',
+    'projects',
+]);
+
+test('sessions table has every column the database session driver writes', function () {
+    expect(Schema::hasColumns('sessions', [
+        'id',
+        'user_id',
+        'ip_address',
+        'user_agent',
+        'payload',
+        'last_activity',
+    ]))->toBeTrue();
+});
 
 test('experience page receives resume data', function () {
     $this->get(route('experience'))
