@@ -19,6 +19,11 @@ return [
         'email' => 'drewjredford@gmail.com',
     ],
 
+    /**
+     * Path to the downloadable resume, relative to the public directory.
+     */
+    'pdf' => 'resume/drew-redford-resume.pdf',
+
     'summary' => 'Highly motivated and results-oriented software professional with a proven track record in full-stack development, technical leadership, and process optimization. Adept at transforming support operations, enhancing team efficiency, and delivering impactful technical solutions for complex business challenges. Seeking to leverage advanced development, and a problem-solving mindset to drive significant value in a challenging role.',
 
     'skills' => [
