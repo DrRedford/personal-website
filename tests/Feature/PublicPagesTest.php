@@ -40,6 +40,23 @@ test('sessions table has every column the database session driver writes', funct
     ]))->toBeTrue();
 });
 
+test('home page receives hero content derived from the resume', function () {
+    $this->get(route('home'))
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page) => $page
+            ->component('Welcome')
+            ->where('summary', config('resume.summary'))
+            ->where('location', config('resume.contact.location'))
+            ->where('currentRole.title', 'Software Developer')
+            ->where('currentRole.company', 'Vehikl')
+            ->where('resumeUrl', asset(config('resume.pdf')))
+        );
+});
+
+test('the downloadable resume exists in the public directory', function () {
+    expect(public_path(config('resume.pdf')))->toBeReadableFile();
+});
+
 test('experience page receives resume data', function () {
     $this->get(route('experience'))
         ->assertOk()
