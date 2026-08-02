@@ -8,6 +8,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 Route::inertia('/experience', 'Experience')->name('experience');
 Route::inertia('/schooling', 'Schooling')->name('schooling');
-Route::inertia('/portfolio', 'Portfolio')->name('portfolio');
+Route::inertia('/projects', 'Projects')->name('projects');
 
 require __DIR__.'/settings.php';
