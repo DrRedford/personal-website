@@ -24,7 +24,7 @@ export function staggerDelay(index: number): number {
     //
     // Returning `index` is a 1ms step, which is effectively no stagger. It is
     // a deliberate placeholder so reveals still work before this is tuned.
-    return index;
+    return index * 50;
 }
 
 const prefersReducedMotion = (): boolean =>
@@ -56,17 +56,16 @@ const getObserver = (): IntersectionObserver => {
              * already settled by the time it is comfortably readable.
              */
             rootMargin: '0px 0px -10% 0px',
-            threshold: 0.05,
+            /*
+             * Zero, not a fraction. A threshold is a proportion of the element,
+             * so on an entry taller than the viewport a fraction would delay
+             * the reveal until well after it is already on screen.
+             */
+            threshold: 0,
         },
     );
 
     return observer;
-};
-
-const isInViewport = (el: HTMLElement): boolean => {
-    const { top, bottom } = el.getBoundingClientRect();
-
-    return top < window.innerHeight && bottom > 0;
 };
 
 export const vReveal: Directive<HTMLElement, number | undefined> = {
@@ -86,25 +85,12 @@ export const vReveal: Directive<HTMLElement, number | undefined> = {
         );
 
         /*
-         * Content that is already on screen when the page mounts is revealed
-         * directly rather than through the observer. Waiting for the observer
-         * to deliver its first entry leaves a frame of blank space, which on
-         * the hero is the most visible part of the page.
-         *
-         * The nested frame matters: setting the hidden state and the revealed
-         * state inside one frame collapses into a single style recalculation
-         * and the transition never runs.
+         * Everything goes through the observer, including content that is
+         * already on screen. Measuring position here instead would be
+         * unreliable: directive `mounted` hooks fire as the component tree is
+         * built, before the elements below have been laid out, so an entry
+         * near the bottom of a long page can still report itself as on screen.
          */
-        if (isInViewport(el)) {
-            requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                    el.setAttribute(REVEALED_ATTRIBUTE, '');
-                });
-            });
-
-            return;
-        }
-
         getObserver().observe(el);
     },
 
