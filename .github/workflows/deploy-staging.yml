@@ -1,0 +1,64 @@
+name: Deploy to Staging
+
+# Deliberately manual: staging exists to try a branch out before its pull
+# request is merged, so the branch is chosen from the "Run workflow" dropdown
+# in the Actions tab rather than inferred from a push.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Never let two staging deploys race each other onto the same app.
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: false
+
+jobs:
+  checks:
+    uses: ./.github/workflows/tests.yml
+
+  deploy:
+    needs: checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment:
+      name: staging
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      # The spec is templated so the branch you picked, and the app key, are
+      # injected at deploy time. Only these two names are substituted, leaving
+      # any ${...} DigitalOcean binding syntax in the spec untouched.
+      - name: Render app spec
+        env:
+          APP_KEY: ${{ secrets.STAGING_APP_KEY }}
+          DEPLOY_BRANCH: ${{ github.ref_name }}
+          APP_URL: https://staging.drewredford.com
+        run: |
+          test -n "$APP_KEY" || { echo "::error::STAGING_APP_KEY secret is not set"; exit 1; }
+          envsubst '$APP_KEY $DEPLOY_BRANCH $APP_URL' \
+            < .do/app.staging.yaml \
+            > .do/app.rendered.yaml
+
+      - name: Deploy to DigitalOcean Staging
+        id: deploy
+        uses: digitalocean/app_action/deploy@cc55bc9b848d25f9c1c9f831cf843fbab3fbfb15 # v2.0.11
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+          app_spec_location: .do/app.rendered.yaml
+          print_build_logs: true
+          print_deploy_logs: true
+
+      # The action returns the whole app as JSON. Passed through the environment
+      # rather than interpolated into the script, so its contents can never be
+      # parsed as shell.
+      - name: Report deployed URL
+        env:
+          APP_JSON: ${{ steps.deploy.outputs.app }}
+        run: |
+          echo "Staging deployed: $(jq -r '.live_url // "unknown"' <<< "$APP_JSON")" >> "$GITHUB_STEP_SUMMARY"

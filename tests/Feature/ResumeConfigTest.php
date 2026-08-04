@@ -97,5 +97,7 @@ test('the first experience entry can populate the home page headline', function 
  * hold in the config itself.
  */
 test('positions and education are ordered most recent first', function () {
-    // TODO(human)
-});
+    // TODO: assert the ordering. Left unwritten, this reported as a risky test
+    // (a test with no assertions), which is indistinguishable from a passing
+    // one in CI output.
+})->skip('Ordering assertion not written yet.');
