@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\Controller;
+use App\Http\Middleware\HandleInertiaRequests;
+
 arch('debugging helpers never reach the codebase')
     ->expect(['dd', 'dump', 'var_dump', 'ray', 'print_r', 'die', 'exit'])
     ->not->toBeUsed();
@@ -7,12 +10,12 @@ arch('debugging helpers never reach the codebase')
 arch('controllers are invokable page controllers')
     ->expect('App\Http\Controllers')
     ->toHaveSuffix('Controller')
-    ->toExtend(App\Http\Controllers\Controller::class);
+    ->toExtend(Controller::class);
 
 arch('middleware is named consistently')
     ->expect('App\Http\Middleware')
     ->toHaveMethod('handle')
-    ->ignoring(App\Http\Middleware\HandleInertiaRequests::class);
+    ->ignoring(HandleInertiaRequests::class);
 
 /*
  * Resume content belongs in config/resume.php so it can be edited in one

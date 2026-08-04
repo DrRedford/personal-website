@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -58,6 +59,6 @@ expect()->extend('toBeOne', function () {
  */
 function currentAssetVersion(): ?string
 {
-    return app(App\Http\Middleware\HandleInertiaRequests::class)
+    return app(HandleInertiaRequests::class)
         ->version(request());
 }

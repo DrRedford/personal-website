@@ -83,10 +83,15 @@ test('the navigation moves between pages without a full reload', function () {
         ->assertNoJavaScriptErrors();
 });
 
+/*
+ * The toggle buttons are icon-only, so they carry their accessible name in
+ * aria-label rather than text content. click() falls back to matching text,
+ * which never matches here — the attribute selector is what finds them.
+ */
 test('the appearance toggle switches the page to dark mode', function () {
     visit('/')
         ->assertNoJavaScriptErrors()
-        ->click('Dark theme')
+        ->click('[aria-label="Dark theme"]')
         ->assertNoJavaScriptErrors();
 });
 
