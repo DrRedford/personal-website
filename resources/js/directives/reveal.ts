@@ -20,10 +20,6 @@ const REVEALED_ATTRIBUTE = 'data-revealed';
  * How long, in milliseconds, the element at `index` waits before it reveals.
  */
 export function staggerDelay(index: number): number {
-    // TODO(human): decide how a list should cascade into view.
-    //
-    // Returning `index` is a 1ms step, which is effectively no stagger. It is
-    // a deliberate placeholder so reveals still work before this is tuned.
     return index * 50;
 }
 
