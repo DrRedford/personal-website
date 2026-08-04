@@ -1,49 +1,96 @@
 <script setup lang="ts">
-import { Link } from '@inertiajs/vue3';
+import { Link, usePage } from '@inertiajs/vue3';
+import { useWindowScroll } from '@vueuse/core';
+import { computed } from 'vue';
+import AppearanceToggle from '@/components/AppearanceToggle.vue';
 import AppLogo from '@/components/AppLogo.vue';
-import { useCurrentUrl } from '@/composables/useCurrentUrl';
-import { experience, home, projects, schooling } from '@/routes';
-import type { NavItem } from '@/types';
+import SiteNav from '@/components/SiteNav.vue';
+import { home } from '@/routes';
 
-const { isCurrentUrl } = useCurrentUrl();
+const page = usePage();
+const { y } = useWindowScroll();
 
-const navItems: NavItem[] = [
-    { title: 'Home', href: home() },
-    { title: 'Experience', href: experience() },
-    { title: 'Schooling', href: schooling() },
-    { title: 'Projects', href: projects() },
-];
+/*
+ * The header is invisible at rest and only materialises once content has
+ * scrolled beneath it, so the hero meets the top of the viewport cleanly.
+ */
+const isScrolled = computed(() => y.value > 8);
+
+const contact = computed(() => page.props.contact);
+const currentYear = new Date().getFullYear();
 </script>
 
 <template>
-    <div class="min-h-screen bg-background text-foreground">
-        <header class="border-b border-border">
-            <nav
-                class="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-4 p-4"
-            >
-                <Link :href="home()" class="flex items-center gap-2">
-                    <AppLogo />
-                </Link>
+    <div class="flex min-h-screen flex-col bg-background text-foreground">
+        <a
+            href="#main"
+            class="sr-only z-100 rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background focus-visible:not-sr-only focus-visible:fixed focus-visible:top-4 focus-visible:left-4"
+        >
+            Skip to content
+        </a>
 
-                <ul class="flex flex-wrap items-center gap-1">
-                    <li v-for="item in navItems" :key="item.title">
-                        <Link
-                            :href="item.href"
-                            class="rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                            :class="{
-                                'bg-accent text-accent-foreground':
-                                    isCurrentUrl(item.href),
-                            }"
-                        >
-                            {{ item.title }}
-                        </Link>
-                    </li>
-                </ul>
-            </nav>
+        <header
+            class="sticky top-0 z-50 transition-colors duration-300 ease-out-quart"
+            :class="
+                isScrolled
+                    ? 'border-b border-border bg-background/75 backdrop-blur-xl'
+                    : 'border-b border-transparent'
+            "
+        >
+            <div class="shell">
+                <div
+                    class="flex h-14 items-center justify-between gap-4 sm:h-16"
+                >
+                    <Link
+                        :href="home()"
+                        class="group -m-1 rounded-md p-1"
+                        aria-label="Drew Redford, home"
+                    >
+                        <AppLogo />
+                    </Link>
+
+                    <div class="flex items-center gap-6">
+                        <SiteNav class="hidden sm:flex" />
+                        <AppearanceToggle />
+                    </div>
+                </div>
+
+                <!--
+                  Below `sm` the nav drops to its own row instead of collapsing
+                  behind a menu button. Four destinations do not justify hiding
+                  navigation behind an extra tap.
+                -->
+                <div class="-mx-2.5 pb-2.5 sm:hidden">
+                    <SiteNav />
+                </div>
+            </div>
         </header>
 
-        <main class="mx-auto max-w-4xl p-6">
+        <main id="main" class="flex-1">
             <slot />
         </main>
+
+        <footer class="mt-24 border-t border-border py-10">
+            <div class="shell">
+                <div
+                    class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+                >
+                    <p class="text-sm text-muted-foreground">
+                        &copy; {{ currentYear }} {{ page.props.name }}
+                        <span aria-hidden="true" class="mx-2 text-border"
+                            >/</span
+                        >
+                        {{ contact.location }}
+                    </p>
+
+                    <a
+                        :href="`mailto:${contact.email}`"
+                        class="text-sm font-medium text-muted-foreground decoration-brand decoration-2 underline-offset-4 transition-colors duration-200 ease-out-quart hover:text-foreground hover:underline"
+                    >
+                        {{ contact.email }}
+                    </a>
+                </div>
+            </div>
+        </footer>
     </div>
 </template>

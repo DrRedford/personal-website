@@ -15,8 +15,7 @@ return [
 
     'contact' => [
         'location' => 'Beamsville, Ontario',
-        'phone' => '289.219.0567',
-        'email' => 'drewjredford@gmail.com',
+        'email' => 'drew@drewredford.com',
     ],
 
     /**

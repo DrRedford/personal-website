@@ -19,13 +19,14 @@
         </script>
 
         {{-- Inline style to set the HTML background color based on our theme in app.css --}}
+        {{-- Keep these in sync with --background in resources/css/app.css --}}
         <style>
             html {
-                background-color: oklch(1 0 0);
+                background-color: hsl(240 20% 99%);
             }
 
             html.dark {
-                background-color: oklch(0.145 0 0);
+                background-color: hsl(240 10% 3.5%);
             }
         </style>
 

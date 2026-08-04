@@ -29,6 +29,24 @@ test('renders successfully using the database session driver', function (string 
     'projects',
 ]);
 
+/*
+ * The site footer renders on every page, so contact details are shared
+ * globally rather than repeated in each controller.
+ */
+test('every page receives shared contact details for the footer', function (string $routeName) {
+    $this->get(route($routeName))
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page) => $page
+            ->where('contact.location', config('resume.contact.location'))
+            ->where('contact.email', config('resume.contact.email'))
+        );
+})->with([
+    'home',
+    'experience',
+    'schooling',
+    'projects',
+]);
+
 test('sessions table has every column the database session driver writes', function () {
     expect(Schema::hasColumns('sessions', [
         'id',

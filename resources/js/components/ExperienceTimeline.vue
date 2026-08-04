@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import Timeline from '@/components/Timeline.vue';
+import TimelineItem from '@/components/TimelineItem.vue';
 import type { Position } from '@/types';
 
 type Props = {
@@ -12,42 +14,49 @@ withDefaults(defineProps<Props>(), {
 </script>
 
 <template>
-    <ol class="relative space-y-8 border-l border-border">
-        <li
-            v-for="position in positions"
+    <Timeline>
+        <TimelineItem
+            v-for="(position, index) in positions"
             :key="position.company"
-            class="relative pl-6"
+            :title="position.company"
+            :meta="position.location"
+            :index="index"
+            :current="!muted && index === 0"
         >
-            <span
-                class="absolute top-1.5 -left-[5px] size-2.5 rounded-full bg-primary ring-4 ring-background"
-            />
-
-            <div class="flex flex-wrap items-baseline justify-between gap-x-3">
-                <h3 class="font-semibold">{{ position.company }}</h3>
-                <span class="text-sm text-muted-foreground">
-                    {{ position.location }}
-                </span>
-            </div>
-
-            <div class="mt-1 space-y-0.5">
+            <div class="mt-1.5 space-y-1">
                 <div
                     v-for="role in position.roles"
                     :key="role.title"
-                    class="flex flex-wrap items-baseline justify-between gap-x-3 text-sm"
+                    class="flex flex-wrap items-baseline justify-between gap-x-4 text-sm"
                 >
                     <span class="font-medium">{{ role.title }}</span>
-                    <span class="text-muted-foreground">{{ role.period }}</span>
+                    <span class="tabular text-muted-foreground">
+                        {{ role.period }}
+                    </span>
                 </div>
             </div>
 
             <ul
-                class="mt-3 list-disc space-y-1.5 pl-4 text-sm"
-                :class="muted ? 'text-muted-foreground' : 'text-foreground/80'"
+                class="mt-4 space-y-2 text-sm leading-relaxed"
+                :class="muted ? 'text-muted-foreground' : 'text-foreground/75'"
             >
-                <li v-for="highlight in position.highlights" :key="highlight">
+                <li
+                    v-for="highlight in position.highlights"
+                    :key="highlight"
+                    class="relative pl-4"
+                >
+                    <!--
+                      A hairline dash rather than a disc bullet: it sits on the
+                      same visual weight as the timeline rule instead of adding
+                      a second, heavier bullet shape to the page.
+                    -->
+                    <span
+                        aria-hidden="true"
+                        class="absolute top-[0.6875rem] left-0 h-px w-2 bg-border"
+                    />
                     {{ highlight }}
                 </li>
             </ul>
-        </li>
-    </ol>
+        </TimelineItem>
+    </Timeline>
 </template>

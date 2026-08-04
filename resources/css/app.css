@@ -45,6 +45,16 @@
     --color-input: var(--input);
     --color-ring: var(--ring);
 
+    /*
+      The single accent colour. `brand` is the pure hue and is only ever used
+      for non-text marks (dots, rings, rules, indicators) because amber does
+      not reach 4.5:1 against a white background. `brand-text` is the darkened
+      variant reserved for anything that has to be legible as text.
+    */
+    --color-brand: var(--brand);
+    --color-brand-text: var(--brand-text);
+    --color-brand-muted: var(--brand-muted);
+
     --color-chart-1: var(--chart-1);
     --color-chart-2: var(--chart-2);
     --color-chart-3: var(--chart-3);
@@ -59,6 +69,13 @@
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-ring: var(--sidebar-ring);
+
+    /*
+      Motion tokens. Every transition in the app pulls its easing from here so
+      the whole site decelerates with the same personality.
+    */
+    --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /*
@@ -89,32 +106,47 @@
     }
 }
 
+/*
+  Neutrals are pulled a few degrees toward blue rather than sitting at hue 0.
+  A true-grey interface reads as "default"; a consistently cool grey reads as
+  chosen, and it makes the warm amber accent land harder by contrast.
+*/
 :root {
-    --background: hsl(0 0% 100%);
-    --foreground: hsl(0 0% 3.9%);
+    --background: hsl(240 20% 99%);
+    --foreground: hsl(240 10% 4%);
     --card: hsl(0 0% 100%);
-    --card-foreground: hsl(0 0% 3.9%);
+    --card-foreground: hsl(240 10% 4%);
     --popover: hsl(0 0% 100%);
-    --popover-foreground: hsl(0 0% 3.9%);
-    --primary: hsl(0 0% 9%);
-    --primary-foreground: hsl(0 0% 98%);
-    --secondary: hsl(0 0% 92.1%);
-    --secondary-foreground: hsl(0 0% 9%);
-    --muted: hsl(0 0% 96.1%);
-    --muted-foreground: hsl(0 0% 45.1%);
-    --accent: hsl(0 0% 96.1%);
-    --accent-foreground: hsl(0 0% 9%);
+    --popover-foreground: hsl(240 10% 4%);
+    --primary: hsl(240 10% 8%);
+    --primary-foreground: hsl(240 20% 99%);
+    --secondary: hsl(240 8% 95%);
+    --secondary-foreground: hsl(240 10% 8%);
+    --muted: hsl(240 10% 96.5%);
+    --muted-foreground: hsl(240 4% 46%);
+    --accent: hsl(240 10% 95.5%);
+    --accent-foreground: hsl(240 10% 8%);
     --destructive: hsl(0 84.2% 60.2%);
     --destructive-foreground: hsl(0 0% 98%);
-    --border: hsl(0 0% 92.8%);
-    --input: hsl(0 0% 89.8%);
-    --ring: hsl(0 0% 3.9%);
+    --border: hsl(240 6% 90%);
+    --input: hsl(240 6% 88%);
+    /*
+      The focus ring uses the darkened amber, not `--brand`. Pure amber only
+      reaches 2.1:1 against this background and WCAG 1.4.11 requires 3:1 for
+      a focus indicator.
+    */
+    --ring: hsl(28 88% 34%);
+
+    --brand: hsl(38 92% 50%);
+    --brand-text: hsl(28 88% 34%);
+    --brand-muted: hsl(38 92% 50% / 0.12);
+
     --chart-1: hsl(12 76% 61%);
     --chart-2: hsl(173 58% 39%);
     --chart-3: hsl(197 37% 24%);
     --chart-4: hsl(43 74% 66%);
     --chart-5: hsl(27 87% 67%);
-    --radius: 0.5rem;
+    --radius: 0.625rem;
     --sidebar-background: hsl(0 0% 98%);
     --sidebar-foreground: hsl(240 5.3% 26.1%);
     --sidebar-primary: hsl(0 0% 10%);
@@ -127,25 +159,30 @@
 }
 
 .dark {
-    --background: hsl(0 0% 3.9%);
-    --foreground: hsl(0 0% 98%);
-    --card: hsl(0 0% 3.9%);
-    --card-foreground: hsl(0 0% 98%);
-    --popover: hsl(0 0% 3.9%);
-    --popover-foreground: hsl(0 0% 98%);
-    --primary: hsl(0 0% 98%);
-    --primary-foreground: hsl(0 0% 9%);
-    --secondary: hsl(0 0% 14.9%);
-    --secondary-foreground: hsl(0 0% 98%);
-    --muted: hsl(0 0% 16.08%);
-    --muted-foreground: hsl(0 0% 63.9%);
-    --accent: hsl(0 0% 14.9%);
-    --accent-foreground: hsl(0 0% 98%);
+    --background: hsl(240 10% 3.5%);
+    --foreground: hsl(240 15% 98%);
+    --card: hsl(240 9% 6%);
+    --card-foreground: hsl(240 15% 98%);
+    --popover: hsl(240 9% 6%);
+    --popover-foreground: hsl(240 15% 98%);
+    --primary: hsl(240 15% 98%);
+    --primary-foreground: hsl(240 10% 8%);
+    --secondary: hsl(240 6% 13%);
+    --secondary-foreground: hsl(240 15% 98%);
+    --muted: hsl(240 6% 13%);
+    --muted-foreground: hsl(240 5% 65%);
+    --accent: hsl(240 6% 15%);
+    --accent-foreground: hsl(240 15% 98%);
     --destructive: hsl(0 84% 60%);
     --destructive-foreground: hsl(0 0% 98%);
-    --border: hsl(0 0% 14.9%);
-    --input: hsl(0 0% 14.9%);
-    --ring: hsl(0 0% 83.1%);
+    --border: hsl(240 5% 15%);
+    --input: hsl(240 5% 18%);
+    --ring: hsl(43 96% 56%);
+
+    --brand: hsl(43 96% 56%);
+    --brand-text: hsl(43 96% 62%);
+    --brand-muted: hsl(43 96% 56% / 0.14);
+
     --chart-1: hsl(220 70% 50%);
     --chart-2: hsl(160 60% 45%);
     --chart-3: hsl(30 80% 55%);
@@ -164,9 +201,134 @@
 
 @layer base {
     * {
-        @apply border-border outline-ring/50;
+        @apply border-border;
     }
+
+    /*
+      One focus treatment for the entire site. Keyboard users get an
+      unmistakable ring; pointer users never see it.
+
+      This sits in the base layer deliberately. Components that ship their own
+      focus treatment carry an `outline-none` utility, and utilities win over
+      base at equal specificity, so those override this rather than stacking a
+      second indicator on top of their own.
+    */
+    *:focus-visible {
+        @apply outline-2 outline-offset-2 outline-ring;
+    }
+
+    html {
+        scroll-behavior: smooth;
+        /* Keeps anchored headings clear of the sticky header. */
+        scroll-padding-top: 6rem;
+    }
+
     body {
         @apply bg-background text-foreground;
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
+    }
+
+    ::selection {
+        background: var(--brand-muted);
+        color: var(--foreground);
+    }
+
+    /*
+      Date ranges sit in a right-hand column across every timeline. Tabular
+      figures keep those columns optically aligned row to row.
+    */
+    time,
+    .tabular {
+        font-variant-numeric: tabular-nums;
+    }
+
+    h1,
+    h2,
+    h3 {
+        text-wrap: balance;
+    }
+
+    p {
+        text-wrap: pretty;
+    }
+}
+
+@layer utilities {
+    /*
+      The one horizontal rhythm for the site. Header, page content and footer
+      all sit on the same measure so nothing drifts out of alignment.
+    */
+    .shell {
+        margin-inline: auto;
+        width: 100%;
+        max-width: 48rem;
+        padding-inline: 1.5rem;
+    }
+
+    @media (width >= 40rem) {
+        .shell {
+            padding-inline: 2rem;
+        }
+    }
+
+    /*
+      Scroll-reveal base state, applied by the `v-reveal` directive. The
+      directive adds `data-revealed` once the element enters the viewport.
+    */
+    .reveal {
+        opacity: 0;
+        transform: translate3d(0, 0.75rem, 0);
+        transition:
+            opacity 0.6s var(--ease-out-expo),
+            transform 0.6s var(--ease-out-expo);
+        transition-delay: var(--reveal-delay, 0ms);
+        will-change: opacity, transform;
+    }
+
+    .reveal[data-revealed] {
+        opacity: 1;
+        transform: none;
+    }
+
+    /*
+      Faint grid that sits behind the hero only. Masked to fade out radially so
+      it never reads as a texture applied to the whole page.
+    */
+    .bg-grid {
+        background-image:
+            linear-gradient(to right, var(--border) 1px, transparent 1px),
+            linear-gradient(to bottom, var(--border) 1px, transparent 1px);
+        background-size: 4rem 4rem;
+        mask-image: radial-gradient(
+            ellipse 100% 60% at 50% 0%,
+            #000 20%,
+            transparent 75%
+        );
+    }
+}
+
+/*
+  Honour the OS-level reduced motion setting. Transforms are cancelled and
+  durations collapsed, but opacity end-states are preserved so revealed
+  content is never left invisible.
+*/
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    .reveal {
+        opacity: 1;
+        transform: none;
     }
 }

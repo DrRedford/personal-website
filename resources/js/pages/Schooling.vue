@@ -2,6 +2,7 @@
 import { Head } from '@inertiajs/vue3';
 import EducationTimeline from '@/components/EducationTimeline.vue';
 import Heading from '@/components/Heading.vue';
+import PageHeader from '@/components/PageHeader.vue';
 import type { Education } from '@/types';
 
 defineProps<{
@@ -12,11 +13,16 @@ defineProps<{
 <template>
     <Head title="Schooling" />
 
-    <h1 class="text-2xl font-semibold">Schooling</h1>
+    <div class="shell pt-16 pb-4 sm:pt-20">
+        <PageHeader
+            title="Schooling"
+            description="Where the technical foundation was built, most recent first."
+        />
 
-    <section class="mt-10">
-        <Heading title="Education" />
+        <section class="mt-16">
+            <Heading title="Education" />
 
-        <EducationTimeline :education="education" />
-    </section>
+            <EducationTimeline :education="education" />
+        </section>
+    </div>
 </template>
