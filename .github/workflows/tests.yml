@@ -5,13 +5,26 @@ on:
     branches:
       - main
   pull_request:
+  # Exposed so the deploy workflows can run these exact checks as a gate
+  # rather than duplicating them and letting the two definitions drift.
+  workflow_call:
 
 permissions:
   contents: read
 
+# A new push supersedes the run already in flight for the same ref.
+concurrency:
+  group: tests-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   ci:
     runs-on: ubuntu-latest
+
+    # Pest's browser plugin leaves an orphaned `playwright run-server` process
+    # holding stdout open, which can keep a finished job alive until the 6 hour
+    # default timeout. This caps the damage.
+    timeout-minutes: 15
 
     steps:
       - name: Checkout code
@@ -30,9 +43,16 @@ jobs:
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
           node-version: '22'
+          cache: npm
 
       - name: Setup Application
         run: composer setup
+
+      # tests/Browser runs in the default `php artisan test` suite, so CI needs
+      # a real browser. Without this the smoke tests fail on a missing
+      # executable rather than on anything to do with the application.
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
 
       - name: Run CI Checks
         run: composer ci:check

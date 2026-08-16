@@ -1,0 +1,64 @@
+name: Deploy to Production
+
+# Production follows main. The checks job below re-runs the full suite against
+# the merge commit, so a pull request that was green in isolation but broke
+# against an updated main is caught before anything ships.
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+# Queue deploys instead of cancelling them: cancelling mid-rollout would leave
+# whichever deploy won the race as production, which may not be the newer one.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  checks:
+    uses: ./.github/workflows/tests.yml
+
+  deploy:
+    needs: checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment:
+      name: production
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      # Only $APP_KEY is substituted, leaving any ${...} DigitalOcean binding
+      # syntax in the spec untouched.
+      - name: Render app spec
+        env:
+          APP_KEY: ${{ secrets.PRODUCTION_APP_KEY }}
+        run: |
+          test -n "$APP_KEY" || { echo "::error::PRODUCTION_APP_KEY secret is not set"; exit 1; }
+          envsubst '$APP_KEY' \
+            < .do/app.production.yaml \
+            > .do/app.rendered.yaml
+
+      - name: Deploy to DigitalOcean Production
+        id: deploy
+        uses: digitalocean/app_action/deploy@cc55bc9b848d25f9c1c9f831cf843fbab3fbfb15 # v2.0.11
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+          app_spec_location: .do/app.rendered.yaml
+          print_build_logs: true
+          print_deploy_logs: true
+
+      # The action returns the whole app as JSON. Passed through the environment
+      # rather than interpolated into the script, so its contents can never be
+      # parsed as shell.
+      - name: Report deployed URL
+        env:
+          APP_JSON: ${{ steps.deploy.outputs.app }}
+        run: |
+          echo "Production deployed: $(jq -r '.live_url // "unknown"' <<< "$APP_JSON")" >> "$GITHUB_STEP_SUMMARY"

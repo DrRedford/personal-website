@@ -31,3 +31,6 @@ yarn-error.log
 # Pest saves a screenshot of the page whenever a browser test fails.
 /tests/Browser/Screenshots
 
+# Written by the deploy workflows with the app key substituted in. Never commit.
+/.do/app.rendered.yaml
+

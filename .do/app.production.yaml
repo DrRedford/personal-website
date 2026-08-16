@@ -1,0 +1,98 @@
+# DigitalOcean App Platform spec — production.
+#
+# ${APP_KEY} is substituted by the deploy workflow before this file reaches
+# DigitalOcean, so no secret is ever committed here.
+#
+# Applying a spec REPLACES the app's configuration. Any environment variable
+# added by hand in the DigitalOcean dashboard is removed on the next deploy, so
+# every variable the application needs must be declared below.
+name: drew-redford-website-production
+region: tor
+
+services:
+  - name: web
+    dockerfile_path: Dockerfile
+    git:
+      repo_clone_url: https://github.com/DrRedford/personal-website.git
+      branch: main
+    instance_size_slug: apps-s-1vcpu-1gb
+    instance_count: 1
+    http_port: 8080
+
+    # Laravel registers /up via the health check configured in bootstrap/app.php.
+    health_check:
+      http_path: /up
+
+    envs:
+      - key: APP_KEY
+        value: ${APP_KEY}
+        scope: RUN_TIME
+        type: SECRET
+
+      - key: APP_NAME
+        value: Drew Redford
+        scope: RUN_TIME
+
+      - key: APP_ENV
+        value: production
+        scope: RUN_TIME
+
+      # APP_DEBUG=true here would print stack traces, environment variables and
+      # any configured credentials to every visitor.
+      - key: APP_DEBUG
+        value: "false"
+        scope: RUN_TIME
+
+      - key: APP_URL
+        value: https://drewredford.com
+        scope: RUN_TIME
+
+      # App Platform collects stdout/stderr; writing to a file inside an
+      # ephemeral container would lose the logs on every restart.
+      - key: LOG_CHANNEL
+        value: stderr
+        scope: RUN_TIME
+
+      - key: LOG_LEVEL
+        value: error
+        scope: RUN_TIME
+
+      # TODO(human): choose the session, cache and queue drivers for production.
+      #
+      # CONTEXT
+      #   Both app specs are complete except this block. App Platform containers
+      #   have an ephemeral filesystem — anything written to disk vanishes on
+      #   every deploy and restart — and no database is attached. .env.example
+      #   defaults to SESSION_DRIVER=database, CACHE_STORE=database and
+      #   QUEUE_CONNECTION=database, which would need a SQLite file that resets
+      #   on each deploy, with migrations that never run in the container. Those
+      #   defaults cannot carry over. This is the call that decides whether the
+      #   production container is genuinely stateless.
+      #
+      # YOUR TASK
+      #   Replace this comment with envs entries for SESSION_DRIVER,
+      #   SESSION_SECURE_COOKIE, CACHE_STORE and QUEUE_CONNECTION, following the
+      #   same shape as the entries above:
+      #
+      #     - key: SESSION_DRIVER
+      #       value: <driver>
+      #       scope: RUN_TIME
+      #
+      #   .do/app.staging.yaml has one filled-in version to compare against.
+      #
+      # GUIDANCE
+      #   Think about what this site actually does — four pages driven by
+      #   config/resume.php, no auth, no forms, no models, no jobs. Sessions
+      #   still exist because Laravel's `web` middleware group issues CSRF
+      #   tokens. For each driver ask: does this need to survive a restart, and
+      #   does it need to be shared if DigitalOcean ever runs two instances?
+      #   `cookie` sessions ride with the client (signed with APP_KEY, so no
+      #   server state); `file` cache is per-container and rebuilds itself;
+      #   `array` discards entirely. SESSION_SECURE_COOKIE is the one with a
+      #   security consequence rather than a durability one — production is
+      #   HTTPS-only, and .env.example already notes why that matters.
+
+ingress:
+  rules:
+    - component:
+        name: web

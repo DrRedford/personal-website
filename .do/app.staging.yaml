@@ -1,0 +1,79 @@
+# DigitalOcean App Platform spec — staging.
+#
+# ${APP_KEY} and ${DEPLOY_BRANCH} are substituted by the deploy workflow before
+# this file reaches DigitalOcean, so no secret is ever committed here.
+#
+# Applying a spec REPLACES the app's configuration. Any environment variable
+# added by hand in the DigitalOcean dashboard is removed on the next deploy, so
+# every variable the application needs must be declared below.
+name: drew-redford-website-staging
+region: tor
+
+services:
+  - name: web
+    dockerfile_path: Dockerfile
+    git:
+      repo_clone_url: https://github.com/DrRedford/personal-website.git
+      branch: ${DEPLOY_BRANCH}
+    instance_size_slug: apps-s-1vcpu-0.5gb
+    instance_count: 1
+    http_port: 8080
+
+    # Laravel registers /up via the health check configured in bootstrap/app.php.
+    health_check:
+      http_path: /up
+
+    envs:
+      - key: APP_KEY
+        value: ${APP_KEY}
+        scope: RUN_TIME
+        type: SECRET
+
+      - key: APP_NAME
+        value: Drew Redford
+        scope: RUN_TIME
+
+      - key: APP_ENV
+        value: staging
+        scope: RUN_TIME
+
+      # Staging keeps debug off so it fails the same way production would.
+      - key: APP_DEBUG
+        value: "false"
+        scope: RUN_TIME
+
+      - key: APP_URL
+        value: ${APP_URL}
+        scope: RUN_TIME
+
+      - key: LOG_CHANNEL
+        value: stderr
+        scope: RUN_TIME
+
+      - key: LOG_LEVEL
+        value: debug
+        scope: RUN_TIME
+
+      # App Platform containers have an ephemeral filesystem and no database is
+      # attached, so nothing here may assume durable storage. These mirror
+      # whatever production settles on — see .do/app.production.yaml.
+      - key: SESSION_DRIVER
+        value: cookie
+        scope: RUN_TIME
+
+      - key: SESSION_SECURE_COOKIE
+        value: "true"
+        scope: RUN_TIME
+
+      - key: CACHE_STORE
+        value: file
+        scope: RUN_TIME
+
+      - key: QUEUE_CONNECTION
+        value: sync
+        scope: RUN_TIME
+
+ingress:
+  rules:
+    - component:
+        name: web

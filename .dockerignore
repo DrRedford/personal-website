@@ -1,0 +1,25 @@
+# Keep the build context small and, more importantly, keep local secrets and
+# host-built artefacts out of the image. vendor/ and node_modules/ are
+# reinstalled inside the build stage so the image never inherits binaries
+# compiled against a different platform.
+.env
+.env.*
+.git
+.github
+.idea
+.junie
+node_modules
+vendor
+public/build
+public/hot
+public/storage
+bootstrap/ssr
+database/*.sqlite*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+storage/logs/*
+tests/Browser/Screenshots
+resources/js/actions
+resources/js/routes
+resources/js/wayfinder
