@@ -1,19 +1,30 @@
 <script setup lang="ts">
 import { usePage } from '@inertiajs/vue3';
-import AppLogoIcon from '@/components/AppLogoIcon.vue';
+import { computed } from 'vue';
 
-const name = usePage().props.name;
+const page = usePage();
+
+const name = computed(() => page.props.name);
+
+/** Derives the monogram from the site name, e.g. "Drew Redford" -> "DR". */
+const initials = computed(() =>
+    name.value
+        .split(' ')
+        .map((part) => part.charAt(0))
+        .join('')
+        .slice(0, 2)
+        .toUpperCase(),
+);
 </script>
 
 <template>
-    <div
-        class="flex aspect-square size-8 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground"
-    >
-        <AppLogoIcon class="size-5 fill-current text-white dark:text-black" />
-    </div>
-    <div class="ml-1 grid flex-1 text-left text-sm">
-        <span class="mb-0.5 truncate leading-tight font-semibold">{{
-            name
-        }}</span>
-    </div>
+    <span class="flex items-center gap-2.5">
+        <span
+            class="grid size-7 shrink-0 place-items-center rounded-md bg-foreground text-[11px] font-bold tracking-tight text-background transition-transform duration-300 ease-out-quart group-hover:scale-105"
+            aria-hidden="true"
+        >
+            {{ initials }}
+        </span>
+        <span class="text-sm font-semibold tracking-tight">{{ name }}</span>
+    </span>
 </template>

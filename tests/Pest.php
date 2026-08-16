@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -17,6 +18,13 @@ use Tests\TestCase;
 pest()->extend(TestCase::class)
     ->use(RefreshDatabase::class)
     ->in('Feature');
+
+/*
+ * Browser tests drive a real server process, so they deliberately skip
+ * RefreshDatabase: the in-memory SQLite connection used by the test process
+ * is not the one the server would see.
+ */
+pest()->extend(TestCase::class)->in('Browser');
 
 /*
 |--------------------------------------------------------------------------
@@ -44,7 +52,13 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
+/**
+ * The asset version Inertia is currently serving. Tests that simulate a
+ * client-side visit need to send a matching X-Inertia-Version header, or
+ * Inertia answers with a 409 telling the client to hard reload.
+ */
+function currentAssetVersion(): ?string
 {
-    // ..
+    return app(HandleInertiaRequests::class)
+        ->version(request());
 }

@@ -29,6 +29,24 @@ test('renders successfully using the database session driver', function (string 
     'projects',
 ]);
 
+/*
+ * The site footer renders on every page, so contact details are shared
+ * globally rather than repeated in each controller.
+ */
+test('every page receives shared contact details for the footer', function (string $routeName) {
+    $this->get(route($routeName))
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page) => $page
+            ->where('contact.location', config('resume.contact.location'))
+            ->where('contact.email', config('resume.contact.email'))
+        );
+})->with([
+    'home',
+    'experience',
+    'schooling',
+    'projects',
+]);
+
 test('sessions table has every column the database session driver writes', function () {
     expect(Schema::hasColumns('sessions', [
         'id',
@@ -70,6 +88,21 @@ test('experience page receives resume data', function () {
             ->has('positions.0.roles.0.period')
             ->has('positions.0.highlights')
             ->has('otherPositions.0.company')
+        );
+});
+
+test('schooling page receives education data', function () {
+    $this->get(route('schooling'))
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page) => $page
+            ->component('Schooling')
+            ->has('education', 2)
+            ->has('education.0.institution')
+            ->has('education.0.location')
+            ->has('education.0.program')
+            ->has('education.0.period')
+            // Pins most-recent-first ordering, which the timeline relies on.
+            ->where('education.0.period', '2021 – 2023')
         );
 });
 

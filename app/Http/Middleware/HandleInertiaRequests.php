@@ -38,6 +38,10 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'name' => config('app.name'),
+            'contact' => [
+                'location' => config('resume.contact.location'),
+                'email' => config('resume.contact.email'),
+            ],
         ];
     }
 }

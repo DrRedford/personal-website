@@ -23,7 +23,11 @@ npm-debug.log
 yarn-error.log
 /auth.json
 /.fleet
-/.idea
+.idea/
 /.nova
 /.vscode
 /.zed
+
+# Pest saves a screenshot of the page whenever a browser test fails.
+/tests/Browser/Screenshots
+
